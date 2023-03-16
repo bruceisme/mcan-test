@@ -2,7 +2,8 @@
 *.npz
 *.log
 ckpt/
-mcan-vqa-master/datasets/
+mcan-vqa-master/datasets/coco_extract/
+mcan-vqa-master/datasets/vqa/
 *.tear.gz
 *.zip
 *.json
