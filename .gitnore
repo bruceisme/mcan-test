@@ -1,7 +1,9 @@
-dataset/
+*.tear.gz
+*.npz
 *.log
 ckpt/
 mcan-vqa-master/datasets/
 *.tear.gz
 *.zip
 *.json
+dataset/
