@@ -22,6 +22,7 @@ class Cfgs(PATH):
 
         # Set RNG For CPU And GPUs
         self.SEED = random.randint(0, 99999999)
+        #self.SEED=53642477
 
         # -------------------------
         # ---- Version Control ----

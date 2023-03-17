@@ -9,4 +9,5 @@ mcan-vqa-master/datasets/vqa/
 *.json
 dataset/
 mcan-vqa-master/ckpts
+mcan-vqa-master/results
 *.pyc
