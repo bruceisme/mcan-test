@@ -10,4 +10,5 @@ mcan-vqa-master/datasets/vqa/
 dataset/
 mcan-vqa-master/ckpts
 mcan-vqa-master/results
+mcan-vqa-master/tensor
 *.pyc

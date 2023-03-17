@@ -46,6 +46,7 @@ class PATH:
 
         self.RESULT_PATH = './results/result_test/'
         self.PRED_PATH = './results/pred/'
+        self.TENSOR_PATH='./tensor/'
         self.CACHE_PATH = './results/cache/'
         self.LOG_PATH = './results/log/'
         self.CKPTS_PATH = './ckpts/'
