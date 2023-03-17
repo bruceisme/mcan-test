@@ -4,7 +4,7 @@
 # Written by Yuhao Cui https://github.com/cuiyuhao1996
 # --------------------------------------------------------
 
-from cfgs.path_cfgs import PATH
+from cfgs.path_cfgs2 import PATH
 # from path_cfgs import PATH
 
 import os, torch, random
@@ -80,10 +80,10 @@ class Cfgs(PATH):
 
         # Word embedding matrix size
         # (token size x WORD_EMBED_SIZE)
-        self.WORD_EMBED_SIZE = 300
+        self.WORD_EMBED_SIZE = 1024
 
         # Max length of question sentences
-        self.MAX_TOKEN = 14
+        self.MAX_TOKEN = 512
 
         # Filter the answer by occurrence
         # self.ANS_FREQ = 8
@@ -93,10 +93,10 @@ class Cfgs(PATH):
         self.IMG_FEAT_PAD_SIZE = 100
 
         # Faster-rcnn 2048D features
-        self.IMG_FEAT_SIZE = 2048
+        self.IMG_FEAT_SIZE = 4096
 
         # Default training batch size: 64
-        self.BATCH_SIZE = 2
+        self.BATCH_SIZE = 32
 
         # Multi-thread I/O
         self.NUM_WORKERS = 8
@@ -167,6 +167,12 @@ class Cfgs(PATH):
         # Adam optimizer betas and eps
         self.OPT_BETAS = (0.9, 0.98)
         self.OPT_EPS = 1e-9
+        
+        #sciencQA
+        self.use_caption=False
+        self.len_choice=5
+        self.BERT_MODEL = 'Bert'
+        self.BERT_VERSION = 'bert-large-uncased'
 
 
     def parse_to_dict(self, args):

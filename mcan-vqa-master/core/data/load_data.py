@@ -6,7 +6,7 @@
 
 from core.data.data_utils import img_feat_path_load, img_feat_load, ques_load, tokenize, ans_stat
 from core.data.data_utils import proc_img_feat, proc_ques, proc_ans
-
+import sys
 import numpy as np
 import glob, json, torch, time
 import torch.utils.data as Data

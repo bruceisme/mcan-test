@@ -4,8 +4,8 @@
 # Written by Yuhao Cui https://github.com/cuiyuhao1996
 # --------------------------------------------------------
 
-from cfgs.base_cfgs import Cfgs
-from core.exec import Execution
+from cfgs.base_cfgs2 import Cfgs
+from core.exec2 import Execution
 import argparse, yaml
 
 

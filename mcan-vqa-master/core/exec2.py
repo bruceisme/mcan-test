@@ -4,17 +4,19 @@
 # Written by Yuhao Cui https://github.com/cuiyuhao1996
 # --------------------------------------------------------
 
-from core.data.load_data import DataSet
-from core.model.net import Net
+from core.data.load_data2 import DataSet
+from core.model.net2 import Net
 from core.model.optim import get_optim, adjust_lr
 from core.data.data_utils import shuffle_list
 from utils.vqa import VQA
 from utils.vqaEval import VQAEval
 
+from tensorboardX import SummaryWriter
 import os, json, torch, datetime, pickle, copy, shutil, time
 import numpy as np
 import torch.nn as nn
 import torch.utils.data as Data
+from tensorboardX import SummaryWriter
 
 
 class Execution:
@@ -22,7 +24,7 @@ class Execution:
         self.__C = __C
 
         print('Loading training set ........')
-        self.dataset = DataSet(__C)
+        self.dataset = DataSet(__C, 'train')
 
         self.dataset_eval = None
         if __C.EVAL_EVERY_EPOCH:
@@ -30,22 +32,21 @@ class Execution:
             setattr(__C_eval, 'RUN_MODE', 'val')
 
             print('Loading validation set for per-epoch evaluation ........')
-            self.dataset_eval = DataSet(__C_eval)
+            #self.dataset_eval = DataSet(__C_eval)
+            self.dataset_eval = DataSet(__C, 'val')
 
 
     def train(self, dataset, dataset_eval=None):
 
         # Obtain needed information
         data_size = dataset.data_size
-        token_size = dataset.token_size
+        #token_size = dataset.token_size
         ans_size = dataset.ans_size
-        pretrained_emb = dataset.pretrained_emb
+        #pretrained_emb = dataset.pretrained_emb
 
         # Define the MCAN model
         net = Net(
             self.__C,
-            pretrained_emb,
-            token_size,
             ans_size
         )
         net.cuda()
@@ -58,6 +59,12 @@ class Execution:
         # Define the binary cross entropy loss
         # loss_fn = torch.nn.BCELoss(size_average=False).cuda()
         loss_fn = torch.nn.BCELoss(reduction='sum').cuda()
+        
+        tensor_path=self.__C.TENSOR_PATH +'/'+self.__C.VERSION +'/train'
+        if not os.path.exists(tensor_path):
+            os.makedirs(tensor_path)
+            #os.mknod(tensor_path)
+        trainwriter = SummaryWriter(tensor_path)
 
         # Load checkpoint if resume training
         if self.__C.RESUME:
@@ -120,6 +127,7 @@ class Execution:
             )
 
         # Training script
+        step_sum=0
         for epoch in range(start_epoch, self.__C.MAX_EPOCH):
 
             # Save log information
@@ -141,7 +149,7 @@ class Execution:
 
             # Externally shuffle
             if self.__C.SHUFFLE_MODE == 'external':
-                shuffle_list(dataset.ans_list)
+                shuffle_list(dataset.ids)
 
             time_start = time.time()
             # Iteration
@@ -182,6 +190,10 @@ class Execution:
                     # loss /= self.__C.GRAD_ACCU_STEPS
                     loss.backward()
                     loss_sum += loss.cpu().data.numpy() * self.__C.GRAD_ACCU_STEPS
+                    
+                    if step_sum % 5 ==0:
+                        trainwriter.add_scalar('Loss', loss.cpu().data.numpy() / self.__C.SUB_BATCH_SIZE, step_sum)
+                    step_sum+=1
 
                     if self.__C.VERBOSE:
                         if dataset_eval is not None:
@@ -309,14 +321,12 @@ class Execution:
         pred_list = []
 
         data_size = dataset.data_size
-        token_size = dataset.token_size
+        #token_size = dataset.token_size
         ans_size = dataset.ans_size
-        pretrained_emb = dataset.pretrained_emb
+        #pretrained_emb = dataset.pretrained_emb
 
         net = Net(
             self.__C,
-            pretrained_emb,
-            token_size,
             ans_size
         )
         net.cuda()
@@ -325,12 +335,12 @@ class Execution:
         if self.__C.N_GPU > 1:
             net = nn.DataParallel(net, device_ids=self.__C.DEVICES)
 
-        net.load_state_dict(state_dict, False)
+        net.load_state_dict(state_dict)
 
         dataloader = Data.DataLoader(
             dataset,
             batch_size=self.__C.EVAL_BATCH_SIZE,
-            shuffle=False,
+            shuffle=True,
             num_workers=self.__C.NUM_WORKERS,
             pin_memory=True
         )
@@ -352,6 +362,9 @@ class Execution:
                 img_feat_iter,
                 ques_ix_iter
             )
+            # modify
+            print(pred)
+            sys.exit()
             pred_np = pred.cpu().data.numpy()
             pred_argmax = np.argmax(pred_np, axis=1)
 

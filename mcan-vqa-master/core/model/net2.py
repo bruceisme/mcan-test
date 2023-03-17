@@ -7,6 +7,7 @@
 from core.model.net_utils import FC, MLP, LayerNorm
 from core.model.mca import MCA_ED
 import sys
+import transformers
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
@@ -59,17 +60,13 @@ class AttFlat(nn.Module):
 # -------------------------
 
 class Net(nn.Module):
-    def __init__(self, __C, pretrained_emb, token_size, answer_size):
+    def __init__(self, __C, answer_size):
         super(Net, self).__init__()
-
-        self.embedding = nn.Embedding(
-            num_embeddings=token_size,
-            embedding_dim=__C.WORD_EMBED_SIZE
+        self.answer_size = answer_size
+        self.bert = eval(
+            f'transformers.{__C.BERT_MODEL}Model.from_pretrained(\"{__C.BERT_VERSION}\")'
         )
 
-        # Loading the GloVe embedding weights
-        if __C.USE_GLOVE:
-            self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
 
         self.lstm = nn.LSTM(
             input_size=__C.WORD_EMBED_SIZE,
@@ -93,15 +90,17 @@ class Net(nn.Module):
 
 
     def forward(self, img_feat, ques_ix):
-        print(ques_ix.shape)
+        #print(ques_ix.shape)
 
         # Make mask
         lang_feat_mask = self.make_mask(ques_ix.unsqueeze(2))
         img_feat_mask = self.make_mask(img_feat)
 
         # Pre-process Language Feature
-        lang_feat = self.embedding(ques_ix)
-        print(lang_feat.shape)
+        lang_feat = self.bert(
+            ques_ix, 
+            attention_mask= ~lang_feat_mask.squeeze(1).squeeze(1)
+        )[0]
         lang_feat, _ = self.lstm(lang_feat)
 
         # Pre-process Image Feature
