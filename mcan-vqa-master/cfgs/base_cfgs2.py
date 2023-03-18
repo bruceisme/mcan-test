@@ -96,7 +96,7 @@ class Cfgs(PATH):
         self.IMG_FEAT_SIZE = 4096
 
         # Default training batch size: 64
-        self.BATCH_SIZE = 8
+        self.BATCH_SIZE = 2
 
         # Multi-thread I/O
         self.NUM_WORKERS = 8

@@ -84,7 +84,7 @@ class Execution:
             print('Loading ckpt {}'.format(path))
             ckpt = torch.load(path)
             print('Finish!')
-            net.load_state_dict(ckpt['state_dict'])
+            net.load_state_dict(ckpt['state_dict'], False)
 
             # Load the optimizer paramters
             optim = get_optim(self.__C, net, data_size, ckpt['lr_base'])
@@ -182,6 +182,8 @@ class Execution:
                         sub_img_feat_iter,
                         sub_ques_ix_iter
                     )
+                    print(pred)
+                    sys.exit()
 
                     loss = loss_fn(pred, sub_ans_iter)
                     # only mean-reduction needs be divided by grad_accu_steps
